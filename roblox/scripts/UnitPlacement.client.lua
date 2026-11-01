@@ -3,6 +3,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -236,26 +237,30 @@ local function createInterface()
 		showStatus("O combate automatico sera conectado na proxima etapa")
 	end)
 
+	local function updateBrushFromX(x)
+		local width = brushTrack.AbsoluteSize.X
+		if width > 0 then
+			local position = (x - brushTrack.AbsolutePosition.X) / width
+			setBrush(position < 0.5 and 1 or 2)
+		end
+	end
 	brushTrack.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1
 			or input.UserInputType == Enum.UserInputType.Touch then
 			draggingSlider = true
-			local width = brushTrack.AbsoluteSize.X
-			if width > 0 then
-				local position = (input.Position.X - brushTrack.AbsolutePosition.X) / width
-				setBrush(position < 0.5 and 1 or 2)
-			end
+			updateBrushFromX(input.Position.X)
 		end
 	end)
 end
 
-local function getWorldCell()
+local function getWorldCell(screenPosition)
 	local camera = workspace.CurrentCamera
 	if not camera then
 		return nil
 	end
-	local mousePosition = UserInputService:GetMouseLocation()
-	local ray = camera:ScreenPointToRay(mousePosition.X, mousePosition.Y)
+	local mousePosition = screenPosition or UserInputService:GetMouseLocation()
+	local guiInset = GuiService:GetGuiInset()
+	local ray = camera:ScreenPointToRay(mousePosition.X - guiInset.X, mousePosition.Y - guiInset.Y)
 	if math.abs(ray.Direction.Y) < 0.0001 then
 		return nil
 	end
@@ -272,9 +277,16 @@ local function getWorldCell()
 	return x, z
 end
 
-local function placeAtMouse()
-	local x, z = getWorldCell()
+local function placeAtScreenPosition(screenPosition)
+	local x, z = getWorldCell(screenPosition)
 	if not x then
+		return
+	end
+	if math.abs(x) > PLAYER_MAX_X or z < PLAYER_MIN_Z or z > PLAYER_MAX_Z then
+		local inBattlefield = math.abs(x) <= 350 and math.abs(z) <= 260
+		if inBattlefield then
+			showStatus("Posição inválida")
+		end
 		return
 	end
 	local key = tostring(x) .. ":" .. tostring(z)
@@ -289,7 +301,13 @@ local function placeAtMouse()
 	else
 		for xOffset = 0, 1 do
 			for zOffset = 0, 1 do
-				table.insert(positions, Vector3.new(x + xOffset * GRID_SIZE, 0, z + zOffset * GRID_SIZE))
+				local cellX = x + xOffset * GRID_SIZE
+				local cellZ = z + zOffset * GRID_SIZE
+				if math.abs(cellX) > PLAYER_MAX_X or cellZ < PLAYER_MIN_Z or cellZ > PLAYER_MAX_Z then
+					showStatus("Posição inválida")
+					return
+				end
+				table.insert(positions, Vector3.new(cellX, 0, cellZ))
 			end
 		end
 	end
@@ -302,6 +320,8 @@ placementEvent.OnClientEvent:Connect(function(message, available)
 		if unitCountLabel then
 			unitCountLabel.Text = tostring(availableUnits)
 		end
+	elseif message == "InvalidPosition" then
+		showStatus("Posição inválida")
 	end
 end)
 
@@ -312,9 +332,9 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		painting = true
 		lastPaintCell = nil
-		placeAtMouse()
+		placeAtScreenPosition(input.Position)
 	elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-		local x, z = getWorldCell()
+		local x, z = getWorldCell(input.Position)
 		if x then
 			placementEvent:FireServer("RemoveAt", Vector3.new(x, 0, z))
 		end
@@ -335,7 +355,7 @@ UserInputService.InputChanged:Connect(function(input)
 			end
 		end
 	elseif painting and input.UserInputType == Enum.UserInputType.MouseMovement then
-		placeAtMouse()
+		placeAtScreenPosition(input.Position)
 	end
 end)
 
@@ -356,3 +376,4 @@ startEvent.OnClientEvent:Connect(function(message)
 		placementEvent:FireServer("StateRequest")
 	end
 end)
+
