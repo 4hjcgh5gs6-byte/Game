@@ -390,8 +390,8 @@ local function getWorldCell(screenPosition)
 	if not camera then
 		return nil
 	end
-	local mousePosition = screenPosition or UserInputService:GetMouseLocation()
-	local ray = camera:ViewportPointToRay(mousePosition.X, mousePosition.Y)
+	-- Roblox's mouse ray already accounts for the Studio viewport and GUI inset.
+	local ray = player:GetMouse().UnitRay
 	if math.abs(ray.Direction.Y) < 0.0001 then
 		return nil
 	end
