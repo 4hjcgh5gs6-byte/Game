@@ -82,8 +82,17 @@ status.TextColor3 = Color3.fromRGB(145, 150, 155)
 status.TextScaled = true
 status.Parent = background
 
+local camera = workspace.CurrentCamera
+while not camera do
+    task.wait(0.1)
+    camera = workspace.CurrentCamera
+end
+camera.CameraType = Enum.CameraType.Scriptable
+camera.FieldOfView = 40
+camera.CFrame = CFrame.new(0, 600, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+
 local targetParts = 16
-local minimumDisplayTime = 5
+local minimumDisplayTime = 22
 local maximumWaitTime = 90
 local lastPercent = -1
 local currentProgress = 0
@@ -112,7 +121,7 @@ while os.clock() - loadingStarted < maximumWaitTime do
     if loadedParts >= targetParts and displayTimeReached then
         break
     end
-    task.wait(0.15)
+    task.wait(0.1)
 end
 
 status.Text = "Arena pronta!"
@@ -130,3 +139,5 @@ end
 TweenService:Create(background, fade, { BackgroundTransparency = 1 }):Play()
 task.wait(0.5)
 screen:Destroy()
+
+
