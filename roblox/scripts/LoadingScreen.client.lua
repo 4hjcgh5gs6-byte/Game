@@ -268,7 +268,7 @@ local percentLabel = makeText(
 percentLabel.Visible = false
 
 local startEvent = ReplicatedStorage:WaitForChild("StartFirstStage")
-local targetParts = 16
+local targetParts = 3
 local minimumLoadTime = 5
 local maximumLoadTime = 90
 local loading = false
@@ -307,9 +307,11 @@ local function startPhase(difficulty)
         if not battlefield or battlefield:GetAttribute("Ready") ~= true then
             return false
         end
+        local enemyPreview = battlefield:FindFirstChild("EnemyPreview")
         return battlefield:FindFirstChild("BlackBattlefield") ~= nil
             and battlefield:FindFirstChild("WhiteTerritoryDivider") ~= nil
-            and #battlefield:GetChildren() >= targetParts
+            and enemyPreview ~= nil
+            and #enemyPreview:GetChildren() >= 5
     end
 
     serverLoadFailed = false
