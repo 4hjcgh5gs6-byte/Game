@@ -3,6 +3,24 @@
 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+
+-- Remove a névoa e o brilho do projeto que clareavam o piso preto.
+Lighting.Brightness = 1
+Lighting.GlobalShadows = false
+Lighting.Ambient = Color3.new(0, 0, 0)
+Lighting.OutdoorAmbient = Color3.new(0, 0, 0)
+Lighting.EnvironmentDiffuseScale = 0
+Lighting.EnvironmentSpecularScale = 0
+for _, effect in ipairs(Lighting:GetChildren()) do
+	if effect:IsA("PostEffect") then
+		effect.Enabled = false
+	elseif effect:IsA("Atmosphere") then
+		effect.Density = 0
+		effect.Haze = 0
+		effect.Glare = 0
+	end
+end
 
 -- Impede que o avatar apareça e remove um avatar já carregado.
 Players.CharacterAutoLoads = false
