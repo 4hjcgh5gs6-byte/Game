@@ -37,12 +37,12 @@ floor.Parent = folder
 
 local divider = Instance.new("Part")
 divider.Name = "WhiteTerritoryDivider"
-divider.Size = Vector3.new(FIELD_WIDTH, 0.08, 0.6)
-divider.Position = Vector3.new(0, 0.04, 0)
+divider.Size = Vector3.new(FIELD_WIDTH, 0.2, 3)
+divider.Position = Vector3.new(0, 0.1, 0)
 divider.Anchored = true
 divider.CanCollide = false
 divider.Color = Color3.fromRGB(255, 255, 255)
-divider.Material = Enum.Material.SmoothPlastic
+divider.Material = Enum.Material.Neon
 divider.TopSurface = Enum.SurfaceType.Smooth
 divider.BottomSurface = Enum.SurfaceType.Smooth
 divider.Parent = folder
