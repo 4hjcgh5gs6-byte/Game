@@ -86,6 +86,7 @@ local targetParts = 518
 local minimumDisplayTime = 20
 local maximumWaitTime = 90
 local lastPercent = -1
+local currentProgress = 0
 
 while not game:IsLoaded() and os.clock() - loadingStarted < maximumWaitTime do
     task.wait(0.1)
@@ -94,13 +95,16 @@ end
 while os.clock() - loadingStarted < maximumWaitTime do
     local battlefield = workspace:FindFirstChild("BattlefieldGenerated")
     local loadedParts = battlefield and #battlefield:GetChildren() or 0
-    local percent = math.clamp(math.floor((loadedParts / targetParts) * 100), 0, 99)
+    local loadedFraction = math.clamp(loadedParts / targetParts, 0, 1)
+    local timeFraction = math.clamp((os.clock() - loadingStarted) / minimumDisplayTime, 0, 1)
+    local progressTarget = math.floor(math.min(loadedFraction, timeFraction) * 95)
+    currentProgress = math.max(currentProgress, progressTarget)
 
-    if percent ~= lastPercent then
-        lastPercent = percent
-        status.Text = ("Carregando arena... %d%%"):format(percent)
-        TweenService:Create(barFill, TweenInfo.new(0.15), {
-            Size = UDim2.fromScale(math.max(percent / 100, 0.025), 1),
+    if currentProgress ~= lastPercent then
+        lastPercent = currentProgress
+        status.Text = ("Carregando arena... %d%%"):format(currentProgress)
+        TweenService:Create(barFill, TweenInfo.new(0.2), {
+            Size = UDim2.fromScale(math.max(currentProgress / 100, 0.025), 1),
         }):Play()
     end
 
@@ -112,8 +116,8 @@ while os.clock() - loadingStarted < maximumWaitTime do
 end
 
 status.Text = "Arena pronta!"
-TweenService:Create(barFill, TweenInfo.new(0.25), { Size = UDim2.fromScale(1, 1) }):Play()
-task.wait(0.35)
+TweenService:Create(barFill, TweenInfo.new(0.35), { Size = UDim2.fromScale(1, 1) }):Play()
+task.wait(0.4)
 
 local fade = TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 for _, item in ipairs(screen:GetDescendants()) do
