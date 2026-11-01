@@ -124,7 +124,12 @@ local function generateBattlefield()
     addTreeCluster(270, 205, "SouthEast")
 end
 
-startEvent.OnServerEvent:Connect(function(player)
+startEvent.OnServerEvent:Connect(function(player, difficulty)
+    if difficulty ~= "Normal" and difficulty ~= "Hard" then
+        return
+    end
+    player:SetAttribute("Difficulty", difficulty)
+
     if generated or generating then
         return
     end
