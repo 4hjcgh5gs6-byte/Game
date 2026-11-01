@@ -139,8 +139,11 @@ startEvent.OnServerEvent:Connect(function(player, difficulty)
     generating = false
     if success then
         generated = true
+        startEvent:FireClient(player, "LoadComplete")
     else
         warn("Falha ao carregar a fase 1:", errorMessage)
         startEvent:FireClient(player, "LoadFailed")
     end
 end)
+
+
