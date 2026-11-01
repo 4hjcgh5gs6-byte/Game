@@ -22,6 +22,9 @@ local function createWarriorTemplate(faction, color)
 	model.Name = "Circulo_Guerreiro_" .. faction
 	model:SetAttribute("UnitType", "Warrior")
 	model:SetAttribute("Faction", faction)
+	model:SetAttribute("MaxHealth", 20)
+	model:SetAttribute("Health", 20)
+	model:SetAttribute("Damage", 2)
 
 	local outline = Instance.new("Part")
 	outline.Name = "Outline"
