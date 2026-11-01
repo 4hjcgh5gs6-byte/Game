@@ -86,6 +86,10 @@ local function generateBattlefield()
         return part
     end
 
+    local backdrop = makePart("DarkBackdrop", Vector3.new(10000, 2, 10000),
+        Vector3.new(0, -3, 0), Color3.fromRGB(16, 17, 16), Enum.Material.Neon)
+    backdrop.CastShadow = false
+
     local floor = makePart(
         "BlackBattlefield",
         Vector3.new(FIELD_WIDTH, FLOOR_THICKNESS, FIELD_DEPTH),
