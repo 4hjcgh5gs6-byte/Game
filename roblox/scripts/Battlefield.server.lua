@@ -16,13 +16,18 @@ local FIELD_WIDTH = 700
 local FIELD_DEPTH = 430
 local FLOOR_THICKNESS = 2
 
-local folder = Workspace:FindFirstChild("BattlefieldGenerated")
-if not folder then
-	folder = Instance.new("Folder")
-	folder.Name = "BattlefieldGenerated"
-	folder.Parent = Workspace
+local battlefield = Workspace:FindFirstChild("BattlefieldGenerated")
+if battlefield and not battlefield:IsA("Model") then
+	battlefield:Destroy()
+	battlefield = nil
 end
-folder:ClearAllChildren()
+if not battlefield then
+	battlefield = Instance.new("Model")
+	battlefield.Name = "BattlefieldGenerated"
+end
+battlefield.ModelStreamingMode = Enum.ModelStreamingMode.Persistent
+battlefield.Parent = Workspace
+battlefield:ClearAllChildren()
 
 local floor = Instance.new("Part")
 floor.Name = "BlackBattlefield"
@@ -33,7 +38,7 @@ floor.Color = Color3.fromRGB(22, 23, 22)
 floor.Material = Enum.Material.SmoothPlastic
 floor.TopSurface = Enum.SurfaceType.Smooth
 floor.BottomSurface = Enum.SurfaceType.Smooth
-floor.Parent = folder
+floor.Parent = battlefield
 
 local divider = Instance.new("Part")
 divider.Name = "WhiteTerritoryDivider"
@@ -45,5 +50,5 @@ divider.Color = Color3.fromRGB(255, 255, 255)
 divider.Material = Enum.Material.Neon
 divider.TopSurface = Enum.SurfaceType.Smooth
 divider.BottomSurface = Enum.SurfaceType.Smooth
-divider.Parent = folder
+divider.Parent = battlefield
 
