@@ -9,6 +9,7 @@ ReplicatedFirst:RemoveDefaultLoadingScreen()
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+
 local masterVolume = SoundService:FindFirstChild("MasterVolume")
 if not masterVolume or not masterVolume:IsA("SoundGroup") then
     if masterVolume then
@@ -68,7 +69,7 @@ local function makeText(name, text, position, size, font, color)
     return label
 end
 
-local title = makeText(
+makeText(
     "Title",
     "BATALHA GEOMÉTRICA",
     UDim2.fromScale(0.5, 0.34),
@@ -90,7 +91,7 @@ local function makeButton(name, text, position)
     button.Name = name
     button.AnchorPoint = Vector2.new(0.5, 0.5)
     button.Position = position
-    button.Size = UDim2.fromScale(0.19, 0.075)
+    button.Size = UDim2.fromScale(0.22, 0.075)
     button.BackgroundColor3 = Color3.fromRGB(35, 38, 42)
     button.BorderSizePixel = 0
     button.AutoButtonColor = true
@@ -108,6 +109,13 @@ end
 
 local playButton = makeButton("PlayButton", "PLAY", UDim2.fromScale(0.5, 0.55))
 local menuButton = makeButton("MenuButton", "MENU", UDim2.fromScale(0.5, 0.66))
+
+local normalButton = makeButton("NormalButton", "NORMAL", UDim2.fromScale(0.5, 0.55))
+local hardButton = makeButton("HardButton", "DIFÍCIL", UDim2.fromScale(0.5, 0.66))
+local difficultyBackButton = makeButton("DifficultyBackButton", "VOLTAR", UDim2.fromScale(0.5, 0.77))
+normalButton.Visible = false
+hardButton.Visible = false
+difficultyBackButton.Visible = false
 
 local settingsPanel = Instance.new("Frame")
 settingsPanel.Name = "SettingsPanel"
@@ -206,10 +214,10 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-local backButton = makeButton("BackButton", "VOLTAR", UDim2.fromScale(0.5, 0.84))
-backButton.Size = UDim2.fromScale(0.26, 0.17)
-backButton.Parent = settingsPanel
-backButton.Activated:Connect(function()
+local settingsBackButton = makeButton("SettingsBackButton", "VOLTAR", UDim2.fromScale(0.5, 0.84))
+settingsBackButton.Size = UDim2.fromScale(0.26, 0.15)
+settingsBackButton.Parent = settingsPanel
+settingsBackButton.Activated:Connect(function()
     settingsPanel.Visible = false
     playButton.Visible = true
     menuButton.Visible = true
@@ -226,7 +234,7 @@ end)
 local progressBack = Instance.new("Frame")
 progressBack.Name = "ProgressBarBackground"
 progressBack.AnchorPoint = Vector2.new(0.5, 0.5)
-progressBack.Position = UDim2.fromScale(0.5, 0.66)
+progressBack.Position = UDim2.fromScale(0.5, 0.62)
 progressBack.Size = UDim2.fromScale(0.36, 0.014)
 progressBack.BackgroundColor3 = Color3.fromRGB(44, 47, 51)
 progressBack.BorderSizePixel = 0
@@ -248,27 +256,48 @@ local progressFillCorner = Instance.new("UICorner")
 progressFillCorner.CornerRadius = UDim.new(1, 0)
 progressFillCorner.Parent = progressFill
 
+local percentLabel = makeText(
+    "ProgressPercent",
+    "0%",
+    UDim2.fromScale(0.5, 0.68),
+    UDim2.fromScale(0.25, 0.035),
+    Enum.Font.Gotham,
+    Color3.fromRGB(145, 150, 155)
+)
+percentLabel.Visible = false
+
 local startEvent = ReplicatedStorage:WaitForChild("StartFirstStage")
 local targetParts = 16
 local minimumLoadTime = 5
 local maximumLoadTime = 90
-local playing = false
+local loading = false
+local serverLoadFailed = false
+startEvent.OnClientEvent:Connect(function(message)
+    if message == "LoadFailed" then
+        serverLoadFailed = true
+    end
+end)
 
-playButton.Activated:Connect(function()
-    if playing then
+local function startPhase(difficulty)
+    if loading then
         return
     end
-    playing = true
-    playButton.Visible = false
-    menuButton.Visible = false
+    loading = true
+    normalButton.Visible = false
+    hardButton.Visible = false
+    difficultyBackButton.Visible = false
     settingsPanel.Visible = false
     progressBack.Visible = true
+    percentLabel.Visible = true
     subtitle.Text = "CARREGANDO A FASE 1"
+    percentLabel.Text = "0%"
+
     local loadStarted = os.clock()
-    startEvent:FireServer()
+    startEvent:FireServer(difficulty)
 
     local lastPercent = -1
     local loadedParts = 0
+    serverLoadFailed = false
     while os.clock() - loadStarted < maximumLoadTime do
         local battlefield = workspace:FindFirstChild("BattlefieldGenerated")
         loadedParts = battlefield and #battlefield:GetChildren() or 0
@@ -278,28 +307,34 @@ playButton.Activated:Connect(function()
 
         if percent ~= lastPercent then
             lastPercent = percent
-            subtitle.Text = ("CARREGANDO A FASE 1  %d%%"):format(percent)
+            percentLabel.Text = ("%d%%"):format(percent)
             TweenService:Create(progressFill, TweenInfo.new(0.15), {
                 Size = UDim2.fromScale(math.max(percent / 100, 0.025), 1),
             }):Play()
         end
 
+        if serverLoadFailed then
+            break
+        end
         if loadedParts >= targetParts and os.clock() - loadStarted >= minimumLoadTime then
             break
         end
         task.wait(0.1)
     end
 
-    if loadedParts < targetParts then
+    if serverLoadFailed or loadedParts < targetParts then
         subtitle.Text = "NÃO FOI POSSÍVEL CARREGAR. TENTE NOVAMENTE."
         progressBack.Visible = false
-        playButton.Text = "TENTAR NOVAMENTE"
-        playButton.Visible = true
-        playing = false
+        percentLabel.Visible = false
+        normalButton.Visible = true
+        hardButton.Visible = true
+        difficultyBackButton.Visible = true
+        loading = false
         return
     end
 
     subtitle.Text = "FASE 1 PRONTA"
+    percentLabel.Text = "100%"
     TweenService:Create(progressFill, TweenInfo.new(0.3), { Size = UDim2.fromScale(1, 1) }):Play()
     task.wait(0.35)
 
@@ -314,4 +349,29 @@ playButton.Activated:Connect(function()
     TweenService:Create(background, fade, { BackgroundTransparency = 1 }):Play()
     task.wait(0.5)
     screen:Destroy()
+end
+
+playButton.Activated:Connect(function()
+    playButton.Visible = false
+    menuButton.Visible = false
+    subtitle.Text = "ESCOLHA A DIFICULDADE"
+    normalButton.Visible = true
+    hardButton.Visible = true
+    difficultyBackButton.Visible = true
+end)
+
+normalButton.Activated:Connect(function()
+    startPhase("Normal")
+end)
+hardButton.Activated:Connect(function()
+    startPhase("Hard")
+end)
+
+difficultyBackButton.Activated:Connect(function()
+    normalButton.Visible = false
+    hardButton.Visible = false
+    difficultyBackButton.Visible = false
+    playButton.Visible = true
+    menuButton.Visible = true
+    subtitle.Text = " "
 end)
