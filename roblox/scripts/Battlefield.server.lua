@@ -66,6 +66,7 @@ local function generateBattlefield()
     end
     battlefield.ModelStreamingMode = Enum.ModelStreamingMode.Persistent
     battlefield.Parent = Workspace
+    battlefield:SetAttribute("Ready", false)
     battlefield:ClearAllChildren()
 
     local function makePart(name, size, position, color, material)
@@ -122,6 +123,7 @@ local function generateBattlefield()
 
     addTreeCluster(-270, -205, "NorthWest")
     addTreeCluster(270, 205, "SouthEast")
+    battlefield:SetAttribute("Ready", true)
 end
 
 startEvent.OnServerEvent:Connect(function(player, difficulty)
