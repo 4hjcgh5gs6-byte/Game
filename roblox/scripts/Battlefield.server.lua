@@ -88,41 +88,41 @@ local function generateBattlefield()
         "BlackBattlefield",
         Vector3.new(FIELD_WIDTH, FLOOR_THICKNESS, FIELD_DEPTH),
         Vector3.new(0, 0, 0),
-        Color3.fromRGB(0, 0, 0),
-        Enum.Material.Neon
+        Color3.fromRGB(24, 25, 23),
+        Enum.Material.SmoothPlastic
     )
     floor.CanCollide = true
 
     makePart(
         "WhiteTerritoryDivider",
-        Vector3.new(FIELD_WIDTH, 0.12, 2),
+        Vector3.new(FIELD_WIDTH, 0.18, 1.2),
         Vector3.new(0, 1.08, 0),
-        Color3.fromRGB(225, 225, 215)
+        Color3.fromRGB(175, 175, 165)
     )
 
-    local function addTreeCluster(centerX, centerZ, prefix)
-        local canopyOffsets = {
-            {-36, -24}, {-36, 24},
-            {0, -24}, {0, 24},
-            {36, -24}, {36, 24},
-            {0, 0},
-        }
+    -- Exército inimigo visível desde a preparação, como referência da fase.
+    -- São apenas círculos nesta primeira fase; ainda não iniciam combate.
+    local unitTemplates = ReplicatedStorage:WaitForChild("UnitTemplates", 10)
+    local enemyTemplate = unitTemplates and unitTemplates:FindFirstChild("Circulo_Guerreiro_Enemy")
+    assert(enemyTemplate, "Template do guerreiro circular inimigo não foi carregado")
+    local enemyFolder = Instance.new("Folder")
+    enemyFolder.Name = "EnemyPreview"
+    enemyFolder.Parent = battlefield
 
-        for index, offset in ipairs(canopyOffsets) do
-            local shade = ((index - 1) % 3) * 5
-            local canopy = makePart(
-                ("%s_Tree_%02d"):format(prefix, index),
-                Vector3.new(44, 8, 40),
-                Vector3.new(centerX + offset[1], 4, centerZ + offset[2]),
-                Color3.fromRGB(105 + shade, 122 + shade, 110 + shade)
-            )
-            canopy.Shape = Enum.PartType.Ball
-            canopy.CanCollide = true
-        end
+    local enemyPositions = {
+        Vector3.new(-40, 2.6, -120),
+        Vector3.new(0, 2.6, -140),
+        Vector3.new(40, 2.6, -120),
+        Vector3.new(-20, 2.6, -190),
+        Vector3.new(20, 2.6, -190),
+    }
+    for index, position in ipairs(enemyPositions) do
+        local enemy = enemyTemplate:Clone()
+        enemy.Name = ("EnemyCircle_%02d"):format(index)
+        enemy:SetAttribute("PreviewOnly", true)
+        enemy:PivotTo(CFrame.new(position))
+        enemy.Parent = enemyFolder
     end
-
-    addTreeCluster(-270, -205, "NorthWest")
-    addTreeCluster(270, 205, "SouthEast")
     battlefield:SetAttribute("Ready", true)
 end
 
