@@ -17,7 +17,7 @@ local function setBattleCamera()
 	if camera then
 		camera.CameraType = Enum.CameraType.Scriptable
 		camera.FieldOfView = 40
-		camera.CFrame = CFrame.new(0, cameraHeight, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+		camera.CFrame = CFrame.lookAt(Vector3.new(0, cameraHeight, cameraHeight * 0.48), Vector3.new(0, 0, 0))
 	end
 end
 
@@ -35,4 +35,3 @@ RunService:BindToRenderStep("BattlefieldTopDownCamera", Enum.RenderPriority.Came
 pcall(function()
 	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
 end)
-
