@@ -82,8 +82,8 @@ status.TextColor3 = Color3.fromRGB(145, 150, 155)
 status.TextScaled = true
 status.Parent = background
 
-local targetParts = 518
-local minimumDisplayTime = 20
+local targetParts = 16
+local minimumDisplayTime = 5
 local maximumWaitTime = 90
 local lastPercent = -1
 local currentProgress = 0
