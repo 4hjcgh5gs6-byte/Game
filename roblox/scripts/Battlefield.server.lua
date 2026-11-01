@@ -14,7 +14,9 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 
 Lighting.Brightness = 1
-Lighting.GlobalShadows = false
+Lighting.GlobalShadows = true
+Lighting.ClockTime = 14
+Lighting.ShadowSoftness = 0.5
 Lighting.Ambient = Color3.fromRGB(130, 130, 130)
 Lighting.OutdoorAmbient = Color3.fromRGB(130, 130, 130)
 Lighting.EnvironmentDiffuseScale = 0
@@ -147,5 +149,3 @@ startEvent.OnServerEvent:Connect(function(player, difficulty)
         startEvent:FireClient(player, "LoadFailed")
     end
 end)
-
-
