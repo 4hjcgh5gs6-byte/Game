@@ -15,8 +15,8 @@ end
 -- Aparência escura e limpa para combinar com a referência visual.
 Lighting.Brightness = 1
 Lighting.GlobalShadows = false
-Lighting.Ambient = Color3.fromRGB(80, 88, 82)
-Lighting.OutdoorAmbient = Color3.fromRGB(80, 88, 82)
+Lighting.Ambient = Color3.fromRGB(32, 36, 33)
+Lighting.OutdoorAmbient = Color3.fromRGB(32, 36, 33)
 Lighting.EnvironmentDiffuseScale = 0
 Lighting.EnvironmentSpecularScale = 0
 for _, effect in ipairs(Lighting:GetChildren()) do
@@ -76,15 +76,15 @@ local floor = makePart(
 	Vector3.new(FIELD_WIDTH, FLOOR_THICKNESS, FIELD_DEPTH),
 	Vector3.new(0, 0, 0),
 	Color3.fromRGB(0, 0, 0),
-	Enum.Material.SmoothPlastic
+	Enum.Material.Neon
 )
 floor.CanCollide = true
 
 local divider = makePart(
 	"WhiteTerritoryDivider",
-	Vector3.new(FIELD_WIDTH, 0.2, 3),
-	Vector3.new(0, 1.1, 0),
-	Color3.fromRGB(235, 235, 226),
+	Vector3.new(FIELD_WIDTH, 0.12, 2),
+	Vector3.new(0, 1.08, 0),
+	Color3.fromRGB(225, 225, 215),
 	Enum.Material.SmoothPlastic
 )
 
@@ -93,19 +93,19 @@ local red = Color3.fromRGB(235, 57, 50)
 
 local function addUnit(shape, side, index, x, z, color)
 	local part
-	local centerY = 2.15
+	local centerY = 2.4
 	if shape == "Circle" then
 		part = Instance.new("Part")
 		part.Shape = Enum.PartType.Ball
-		part.Size = Vector3.new(5.8, 1.7, 5.8)
+		part.Size = Vector3.new(7.5, 2.3, 7.5)
 		part.Position = Vector3.new(x, centerY, z)
 	elseif shape == "Square" then
 		part = Instance.new("Part")
-		part.Size = Vector3.new(5.8, 1.5, 5.8)
+		part.Size = Vector3.new(7.5, 1.8, 7.5)
 		part.Position = Vector3.new(x, centerY, z)
 	elseif shape == "Triangle" then
 		part = Instance.new("WedgePart")
-		part.Size = Vector3.new(5.8, 5.8, 1.5)
+		part.Size = Vector3.new(7.5, 7.5, 1.8)
 		part.CFrame = CFrame.new(x, centerY, z) * CFrame.Angles(math.rad(90), 0, 0)
 	end
 
@@ -113,7 +113,7 @@ local function addUnit(shape, side, index, x, z, color)
 	part.Anchored = true
 	part.CanCollide = false
 	part.Color = color
-	part.Material = Enum.Material.SmoothPlastic
+	part.Material = Enum.Material.Neon
 	part.TopSurface = Enum.SurfaceType.Smooth
 	part.BottomSurface = Enum.SurfaceType.Smooth
 	part:SetAttribute("Side", side)
@@ -176,7 +176,7 @@ local function addTreeCluster(centerX, centerZ, prefix)
 					("%s_Tree_%03d"):format(prefix, index),
 					Vector3.new(15, 4, 15),
 					Vector3.new(x, 3.3, z),
-					Color3.fromRGB(62 + shade, 82 + shade, 72 + shade),
+					Color3.fromRGB(82 + shade, 105 + shade, 92 + shade),
 					Enum.Material.SmoothPlastic
 				)
 				canopy.Shape = Enum.PartType.Ball
