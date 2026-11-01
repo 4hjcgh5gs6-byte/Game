@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 ReplicatedFirst:RemoveDefaultLoadingScreen()
 
@@ -272,9 +273,12 @@ local minimumLoadTime = 5
 local maximumLoadTime = 90
 local loading = false
 local serverLoadFailed = false
+local serverLoadComplete = false
 startEvent.OnClientEvent:Connect(function(message)
     if message == "LoadFailed" then
         serverLoadFailed = true
+    elseif message == "LoadComplete" then
+        serverLoadComplete = true
     end
 end)
 
@@ -293,6 +297,8 @@ local function startPhase(difficulty)
     percentLabel.Text = "0%"
 
     local loadStarted = os.clock()
+    serverLoadComplete = false
+    serverLoadFailed = false
     startEvent:FireServer(difficulty)
 
     local lastPercent = -1
@@ -316,13 +322,13 @@ local function startPhase(difficulty)
         if serverLoadFailed then
             break
         end
-        if loadedParts >= targetParts and os.clock() - loadStarted >= minimumLoadTime then
+        if serverLoadComplete and loadedParts >= targetParts and os.clock() - loadStarted >= minimumLoadTime then
             break
         end
         task.wait(0.1)
     end
 
-    if serverLoadFailed or loadedParts < targetParts then
+    if serverLoadFailed or not serverLoadComplete or loadedParts < targetParts then
         subtitle.Text = "NÃO FOI POSSÍVEL CARREGAR. TENTE NOVAMENTE."
         progressBack.Visible = false
         percentLabel.Visible = false
@@ -332,6 +338,13 @@ local function startPhase(difficulty)
         loading = false
         return
     end
+
+    -- Keep the loading screen up while the replicated arena gets several
+    -- client render frames, then allow a short settling period before fading.
+    for _ = 1, 60 do
+        RunService.RenderStepped:Wait()
+    end
+    task.wait(1.5)
 
     subtitle.Text = "FASE 1 PRONTA"
     percentLabel.Text = "100%"
@@ -375,3 +388,4 @@ difficultyBackButton.Activated:Connect(function()
     menuButton.Visible = true
     subtitle.Text = " "
 end)
+
