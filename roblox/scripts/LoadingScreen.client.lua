@@ -39,7 +39,7 @@ while not camera do
 end
 camera.CameraType = Enum.CameraType.Scriptable
 camera.FieldOfView = 40
-camera.CFrame = CFrame.new(0, 600, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+camera.CFrame = CFrame.new(0, 800, 0) * CFrame.Angles(math.rad(-90), 0, 0)
 
 local screen = Instance.new("ScreenGui")
 screen.Name = "BattlefieldMainMenu"
@@ -303,11 +303,21 @@ local function startPhase(difficulty)
 
     local lastPercent = -1
     local loadedParts = 0
+    local function mapIsReady(battlefield)
+        if not battlefield or battlefield:GetAttribute("Ready") ~= true then
+            return false
+        end
+        return battlefield:FindFirstChild("BlackBattlefield") ~= nil
+            and battlefield:FindFirstChild("WhiteTerritoryDivider") ~= nil
+            and #battlefield:GetChildren() >= targetParts
+    end
+
     serverLoadFailed = false
     while os.clock() - loadStarted < maximumLoadTime do
         local battlefield = workspace:FindFirstChild("BattlefieldGenerated")
         loadedParts = battlefield and #battlefield:GetChildren() or 0
-        local loadedFraction = math.clamp(loadedParts / targetParts, 0, 1)
+        local ready = mapIsReady(battlefield)
+        local loadedFraction = ready and 1 or math.clamp(loadedParts / targetParts, 0, 0.9)
         local timeFraction = math.clamp((os.clock() - loadStarted) / minimumLoadTime, 0, 1)
         local percent = math.floor(math.min(loadedFraction, timeFraction) * 95)
 
@@ -322,13 +332,14 @@ local function startPhase(difficulty)
         if serverLoadFailed then
             break
         end
-        if serverLoadComplete and loadedParts >= targetParts and os.clock() - loadStarted >= minimumLoadTime then
+        if serverLoadComplete and ready and os.clock() - loadStarted >= minimumLoadTime then
             break
         end
         task.wait(0.1)
     end
 
-    if serverLoadFailed or not serverLoadComplete or loadedParts < targetParts then
+    local finalBattlefield = workspace:FindFirstChild("BattlefieldGenerated")
+    if serverLoadFailed or not serverLoadComplete or not mapIsReady(finalBattlefield) then
         subtitle.Text = "NÃO FOI POSSÍVEL CARREGAR. TENTE NOVAMENTE."
         progressBack.Visible = false
         percentLabel.Visible = false
