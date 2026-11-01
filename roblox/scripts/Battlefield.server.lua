@@ -12,8 +12,8 @@ for _, player in ipairs(Players:GetPlayers()) do
 	end
 end
 
-local FIELD_WIDTH = 320
-local FIELD_DEPTH = 200
+local FIELD_WIDTH = 700
+local FIELD_DEPTH = 430
 local FLOOR_THICKNESS = 2
 
 local folder = Workspace:FindFirstChild("BattlefieldGenerated")
@@ -29,7 +29,7 @@ floor.Name = "BlackBattlefield"
 floor.Size = Vector3.new(FIELD_WIDTH, FLOOR_THICKNESS, FIELD_DEPTH)
 floor.Position = Vector3.new(0, -FLOOR_THICKNESS / 2, 0)
 floor.Anchored = true
-floor.Color = Color3.fromRGB(0, 0, 0)
+floor.Color = Color3.fromRGB(22, 23, 22)
 floor.Material = Enum.Material.SmoothPlastic
 floor.TopSurface = Enum.SurfaceType.Smooth
 floor.BottomSurface = Enum.SurfaceType.Smooth
@@ -37,7 +37,7 @@ floor.Parent = folder
 
 local divider = Instance.new("Part")
 divider.Name = "WhiteTerritoryDivider"
-divider.Size = Vector3.new(0.6, 0.08, FIELD_DEPTH)
+divider.Size = Vector3.new(FIELD_WIDTH, 0.08, 0.6)
 divider.Position = Vector3.new(0, 0.04, 0)
 divider.Anchored = true
 divider.CanCollide = false
