@@ -15,8 +15,8 @@ end
 -- Aparência escura e limpa para combinar com a referência visual.
 Lighting.Brightness = 1
 Lighting.GlobalShadows = false
-Lighting.Ambient = Color3.fromRGB(32, 36, 33)
-Lighting.OutdoorAmbient = Color3.fromRGB(32, 36, 33)
+Lighting.Ambient = Color3.fromRGB(45, 48, 46)
+Lighting.OutdoorAmbient = Color3.fromRGB(45, 48, 46)
 Lighting.EnvironmentDiffuseScale = 0
 Lighting.EnvironmentSpecularScale = 0
 for _, effect in ipairs(Lighting:GetChildren()) do
@@ -105,15 +105,15 @@ local function addUnit(shape, side, index, x, z, color)
 		part.Position = Vector3.new(x, centerY, z)
 	elseif shape == "Triangle" then
 		part = Instance.new("WedgePart")
-		part.Size = Vector3.new(7.5, 7.5, 1.8)
-		part.CFrame = CFrame.new(x, centerY, z) * CFrame.Angles(math.rad(90), 0, 0)
+		part.Size = Vector3.new(1.8, 7.5, 7.5)
+		part.CFrame = CFrame.new(x, centerY, z) * CFrame.Angles(0, 0, math.rad(90))
 	end
 
 	part.Name = ("%s_%s_%03d"):format(side, shape, index)
 	part.Anchored = true
 	part.CanCollide = false
 	part.Color = color
-	part.Material = Enum.Material.Neon
+	part.Material = Enum.Material.SmoothPlastic
 	part.TopSurface = Enum.SurfaceType.Smooth
 	part.BottomSurface = Enum.SurfaceType.Smooth
 	part:SetAttribute("Side", side)
@@ -176,7 +176,7 @@ local function addTreeCluster(centerX, centerZ, prefix)
 					("%s_Tree_%03d"):format(prefix, index),
 					Vector3.new(15, 4, 15),
 					Vector3.new(x, 3.3, z),
-					Color3.fromRGB(82 + shade, 105 + shade, 92 + shade),
+					Color3.fromRGB(96 + shade, 116 + shade, 104 + shade),
 					Enum.Material.SmoothPlastic
 				)
 				canopy.Shape = Enum.PartType.Ball
