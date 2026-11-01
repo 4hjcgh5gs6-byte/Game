@@ -9,6 +9,27 @@ ReplicatedFirst:RemoveDefaultLoadingScreen()
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+local masterVolume = SoundService:FindFirstChild("MasterVolume")
+if not masterVolume or not masterVolume:IsA("SoundGroup") then
+    if masterVolume then
+        masterVolume:Destroy()
+    end
+    masterVolume = Instance.new("SoundGroup")
+    masterVolume.Name = "MasterVolume"
+    masterVolume.Volume = 0.5
+    masterVolume.Parent = SoundService
+end
+
+local function routeSound(instance)
+    if instance:IsA("Sound") then
+        instance.SoundGroup = masterVolume
+    end
+end
+for _, instance in ipairs(game:GetDescendants()) do
+    routeSound(instance)
+end
+game.DescendantAdded:Connect(routeSound)
+
 local camera = workspace.CurrentCamera
 while not camera do
     task.wait(0.1)
@@ -57,7 +78,7 @@ local title = makeText(
 )
 local subtitle = makeText(
     "Subtitle",
-    "ESCOLHA UMA OPÇÃO",
+    " ",
     UDim2.fromScale(0.5, 0.44),
     UDim2.fromScale(0.7, 0.04),
     Enum.Font.GothamMedium,
@@ -85,8 +106,8 @@ local function makeButton(name, text, position)
     return button
 end
 
-local playButton = makeButton("PlayButton", "PLAY", UDim2.fromScale(0.4, 0.57))
-local menuButton = makeButton("MenuButton", "MENU", UDim2.fromScale(0.6, 0.57))
+local playButton = makeButton("PlayButton", "PLAY", UDim2.fromScale(0.5, 0.55))
+local menuButton = makeButton("MenuButton", "MENU", UDim2.fromScale(0.5, 0.66))
 
 local settingsPanel = Instance.new("Frame")
 settingsPanel.Name = "SettingsPanel"
@@ -136,7 +157,7 @@ volumeTrack.Parent = settingsPanel
 
 local volumeFill = Instance.new("Frame")
 volumeFill.Name = "VolumeFill"
-volumeFill.Size = UDim2.fromScale(SoundService.Volume, 1)
+volumeFill.Size = UDim2.fromScale(masterVolume.Volume, 1)
 volumeFill.BackgroundColor3 = Color3.fromRGB(235, 235, 235)
 volumeFill.BorderSizePixel = 0
 volumeFill.Parent = volumeTrack
@@ -149,7 +170,7 @@ trackCorner.CornerRadius = UDim.new(1, 0)
 trackCorner.Parent = volumeTrack
 
 local function updateVolumeLabel()
-    volumeLabel.Text = ("VOLUME GERAL  %d%%"):format(math.floor(SoundService.Volume * 100 + 0.5))
+    volumeLabel.Text = ("VOLUME GERAL  %d%%"):format(math.floor(masterVolume.Volume * 100 + 0.5))
 end
 updateVolumeLabel()
 
@@ -159,7 +180,7 @@ local function setVolumeFromX(x)
         return
     end
     local volume = math.clamp((x - volumeTrack.AbsolutePosition.X) / width, 0, 1)
-    SoundService.Volume = volume
+    masterVolume.Volume = volume
     volumeFill.Size = UDim2.fromScale(volume, 1)
     updateVolumeLabel()
 end
@@ -192,7 +213,7 @@ backButton.Activated:Connect(function()
     settingsPanel.Visible = false
     playButton.Visible = true
     menuButton.Visible = true
-    subtitle.Text = "ESCOLHA UMA OPÇÃO"
+    subtitle.Text = " "
 end)
 
 menuButton.Activated:Connect(function()
