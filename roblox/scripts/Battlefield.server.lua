@@ -13,7 +13,7 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 
 local FIELD_WIDTH = 700
-local FIELD_DEPTH = 430
+local FIELD_DEPTH = 520
 local FLOOR_THICKNESS = 2
 
 -- Remove os objetos padrão que ficam coplanares ao campo e causam cintilação.
@@ -44,7 +44,7 @@ floor.Name = "BlackBattlefield"
 floor.Size = Vector3.new(FIELD_WIDTH, FLOOR_THICKNESS, FIELD_DEPTH)
 floor.Position = Vector3.new(0, 0, 0)
 floor.Anchored = true
-floor.Color = Color3.fromRGB(22, 23, 22)
+floor.Color = Color3.fromRGB(0, 0, 0)
 floor.Material = Enum.Material.SmoothPlastic
 floor.TopSurface = Enum.SurfaceType.Smooth
 floor.BottomSurface = Enum.SurfaceType.Smooth
