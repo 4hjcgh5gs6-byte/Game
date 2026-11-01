@@ -112,7 +112,7 @@ local function placeUnits(player, positions)
 
 		local unit = template:Clone()
 		unit:SetAttribute("OwnerUserId", player.UserId)
-		unit:PivotTo(CFrame.new(x, 2.3, z))
+		unit:PivotTo(CFrame.new(x, 2.6, z))
 		unit.Parent = folder
 		table.insert(state.units, unit)
 		table.insert(added, unit)
