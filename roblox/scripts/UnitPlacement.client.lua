@@ -23,6 +23,8 @@ local draggingSlider = false
 local draggingVolume = false
 local lastPaintCell = nil
 local statusVersion = 0
+local battleState = "Preparation"
+local fightControl
 
 local screen
 local unitCountLabel
@@ -143,6 +145,7 @@ local function createInterface()
 	padding.Parent = panel
 	local layout = Instance.new("UIListLayout")
 	layout.FillDirection = Enum.FillDirection.Horizontal
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.VerticalAlignment = Enum.VerticalAlignment.Center
 	layout.Padding = UDim.new(0, 9)
 	layout.Parent = panel
@@ -236,6 +239,10 @@ local function createInterface()
 	local upgradesButton = makeButton("Upgrades", "UPGRADES", 92, panel)
 	local levelsButton = makeButton("Levels", "LEVELS", 76, panel)
 	local fightButton = makeButton("Fight", "FIGHT", 84, panel)
+	fightControl = fightButton
+	for order, control in ipairs({unitButton, brushPanel, undoButton, clearButton, upgradesButton, levelsButton, fightButton}) do
+		control.LayoutOrder = order
+	end
 
 	for _, button in ipairs({ upgradesButton, levelsButton }) do
 		button.Active = false
@@ -347,13 +354,19 @@ local function createInterface()
 		showStatus("Guerreiro circular selecionado")
 	end)
 	undoButton.Activated:Connect(function()
+		if battleState ~= "Preparation" then return end
 		placementEvent:FireServer("Undo")
 	end)
 	clearButton.Activated:Connect(function()
+		if battleState ~= "Preparation" then return end
 		placementEvent:FireServer("Clear")
 	end)
 	fightButton.Activated:Connect(function()
-		showStatus("O combate automatico sera conectado na proxima etapa")
+		if battleState == "Preparation" then
+			placementEvent:FireServer("Fight")
+		elseif battleState == "Finished" then
+			placementEvent:FireServer("Retry")
+		end
 	end)
 
 	local function updateBrushFromX(x)
@@ -378,7 +391,7 @@ local function getWorldCell(screenPosition)
 		return nil
 	end
 	local mousePosition = screenPosition or UserInputService:GetMouseLocation()
-	local ray = camera:ScreenPointToRay(mousePosition.X, mousePosition.Y)
+	local ray = camera:ViewportPointToRay(mousePosition.X, mousePosition.Y)
 	if math.abs(ray.Direction.Y) < 0.0001 then
 		return nil
 	end
@@ -389,13 +402,11 @@ local function getWorldCell(screenPosition)
 	local hit = ray.Origin + ray.Direction * distance
 	local x = snapToGrid(hit.X)
 	local z = snapToGrid(hit.Z)
-	if math.abs(x) > PLAYER_MAX_X or z < PLAYER_MIN_Z or z > PLAYER_MAX_Z then
-		return nil
-	end
 	return x, z
 end
 
 local function placeAtScreenPosition(screenPosition)
+	if battleState ~= "Preparation" then return end
 	local x, z = getWorldCell(screenPosition)
 	if not x then
 		return
@@ -433,7 +444,23 @@ local function placeAtScreenPosition(screenPosition)
 end
 
 placementEvent.OnClientEvent:Connect(function(message, available)
-	if message == "State" and typeof(available) == "number" then
+	if message == "BattleState" then
+		battleState = available
+		painting = false
+		lastPaintCell = nil
+		if fightControl then fightControl.Text = available == "Fighting" and "LUTANDO" or "FIGHT" end
+		if statusLabel then statusVersion += 1; statusLabel.Visible = false end
+	elseif message == "BattleResult" then
+		battleState = "Finished"
+		if fightControl then fightControl.Text = "REPETIR" end
+		if statusLabel then
+			statusVersion += 1
+			statusLabel.Text = available .. " — REPETIR para preparar outra batalha"
+			statusLabel.Visible = true
+		end
+	elseif message == "Notice" then
+		showStatus(available)
+	elseif message == "State" and typeof(available) == "number" then
 		availableUnits = math.clamp(available, 0, 5)
 		if unitCountLabel then
 			unitCountLabel.Text = tostring(availableUnits)
@@ -444,7 +471,7 @@ placementEvent.OnClientEvent:Connect(function(message, available)
 end)
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if not interfaceCreated or gameProcessed then
+	if not interfaceCreated or gameProcessed or battleState ~= "Preparation" or (menuPanel and menuPanel.Visible) then
 		return
 	end
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -507,4 +534,3 @@ startEvent.OnClientEvent:Connect(function(message)
 		placementEvent:FireServer("StateRequest")
 	end
 end)
-
