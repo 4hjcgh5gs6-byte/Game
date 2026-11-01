@@ -91,6 +91,7 @@ local function placeUnits(player, positions)
 	end
 
 	local added = {}
+	local invalidPosition = false
 	for _, requestedPosition in ipairs(positions) do
 		if #state.units >= UNIT_LIMIT then
 			break
@@ -102,6 +103,7 @@ local function placeUnits(player, positions)
 		local x = snapToGrid(requestedPosition.X)
 		local z = snapToGrid(requestedPosition.Z)
 		if math.abs(x) > MAX_PLAYER_X or z < MIN_PLAYER_Z or z > MAX_PLAYER_Z then
+			invalidPosition = true
 			continue
 		end
 		if isCellOccupied(folder, x, z) then
@@ -120,6 +122,9 @@ local function placeUnits(player, positions)
 		table.insert(state.history, { kind = "Place", units = added })
 	end
 	sendState(player)
+	if invalidPosition then
+		placementEvent:FireClient(player, "InvalidPosition")
+	end
 end
 
 local function removeUnitAt(player, requestedPosition)
@@ -137,7 +142,7 @@ local function removeUnitAt(player, requestedPosition)
 			if math.abs(position.X - x) <= GRID_SIZE / 2
 				and math.abs(position.Z - z) <= GRID_SIZE / 2 then
 				local previousPivot = unit:GetPivot()
-				table.remove(state.units, index)
+			table.remove(state.units, index)
 				unit.Parent = nil
 				table.insert(state.history, {
 					kind = "Remove",
@@ -226,3 +231,4 @@ Players.PlayerRemoving:Connect(function(player)
 		states[player] = nil
 	end
 end)
+
