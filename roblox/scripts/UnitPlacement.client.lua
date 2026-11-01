@@ -3,7 +3,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
-local GuiService = game:GetService("GuiService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -259,8 +258,7 @@ local function getWorldCell(screenPosition)
 		return nil
 	end
 	local mousePosition = screenPosition or UserInputService:GetMouseLocation()
-	local guiInset = GuiService:GetGuiInset()
-	local ray = camera:ScreenPointToRay(mousePosition.X - guiInset.X, mousePosition.Y - guiInset.Y)
+	local ray = camera:ScreenPointToRay(mousePosition.X, mousePosition.Y)
 	if math.abs(ray.Direction.Y) < 0.0001 then
 		return nil
 	end
