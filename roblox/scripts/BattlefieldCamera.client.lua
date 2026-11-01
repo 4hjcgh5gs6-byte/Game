@@ -13,7 +13,7 @@ end
 camera.CameraType = Enum.CameraType.Scriptable
 camera.FieldOfView = 40
 camera.CFrame = CFrame.lookAt(
-	Vector3.new(0, 320, 0),
+	Vector3.new(0, 430, 0),
 	Vector3.new(0, 0, 0),
 	Vector3.new(0, 0, -1)
 )
