@@ -29,7 +29,7 @@ local function createWarriorTemplate(faction, color)
 	local outline = Instance.new("Part")
 	outline.Name = "Outline"
 	outline.Shape = Enum.PartType.Ball
-	outline.Size = Vector3.new(12, 2.2, 12)
+	outline.Size = Vector3.new(19, 2.8, 19)
 	outline.Position = Vector3.new(0, 0, 0)
 	outline.Anchored = true
 	outline.CanCollide = false
@@ -42,7 +42,7 @@ local function createWarriorTemplate(faction, color)
 	local body = Instance.new("Part")
 	body.Name = "Circle"
 	body.Shape = Enum.PartType.Ball
-	body.Size = Vector3.new(10, 2.4, 10)
+	body.Size = Vector3.new(16, 3, 16)
 	body.Position = Vector3.new(0, 0.25, 0)
 	body.Anchored = true
 	body.CanCollide = false
@@ -58,3 +58,4 @@ end
 
 createWarriorTemplate("Ally", unitColors.Ally)
 createWarriorTemplate("Enemy", unitColors.Enemy)
+
