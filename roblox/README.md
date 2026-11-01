@@ -9,4 +9,4 @@ O campo é uma arena preta, vista de cima, com uma linha branca horizontal divid
 3. Em `StarterPlayer > StarterPlayerScripts`, crie um **LocalScript** chamado `BattleFieldCamera` e cole o conteúdo de [BattlefieldCamera.client.lua](scripts/BattlefieldCamera.client.lua).
 4. Pressione **Jogar** para gerar e visualizar o tabuleiro.
 
-O campo mede 700 por 520 studs. O script mantém o modelo do campo disponível para o cliente mesmo quando o carregamento por distância do Roblox estiver ativo.
+O campo mede 700 por 520 studs. O script mantém o modelo do campo disponível para o cliente mesmo quando o carregamento por distância do Roblox estiver ativo, e desativa os efeitos de iluminação que clareavam o piso.
