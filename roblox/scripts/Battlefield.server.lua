@@ -98,6 +98,29 @@ local function generateBattlefield()
         Enum.Material.SmoothPlastic
     )
     floor.CanCollide = true
+    -- One surface with 62 thin GUI lines, rather than hundreds of floor parts.
+    local grid = Instance.new("SurfaceGui")
+    grid.Name = "PlacementGrid"
+    grid.Face = Enum.NormalId.Top
+    grid.CanvasSize = Vector2.new(FIELD_WIDTH, FIELD_DEPTH)
+    grid.LightInfluence = 0
+    grid.AlwaysOnTop = false
+    grid.Parent = floor
+    local function gridLine(position, size)
+        local line = Instance.new("Frame")
+        line.BorderSizePixel = 0
+        line.BackgroundColor3 = Color3.fromRGB(90, 92, 85)
+        line.BackgroundTransparency = 0.8
+        line.Position = position
+        line.Size = size
+        line.Parent = grid
+    end
+    for x = 0, FIELD_WIDTH, 20 do
+        gridLine(UDim2.fromOffset(x, 0), UDim2.new(0, 1, 1, 0))
+    end
+    for z = 10, FIELD_DEPTH, 20 do
+        gridLine(UDim2.fromOffset(0, z), UDim2.new(1, 0, 0, 1))
+    end
 
     makePart(
         "WhiteTerritoryDivider",
