@@ -3,6 +3,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
+local SoundService = game:GetService("SoundService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -19,6 +20,7 @@ local availableUnits = 5
 local brushSize = 1
 local painting = false
 local draggingSlider = false
+local draggingVolume = false
 local lastPaintCell = nil
 local statusVersion = 0
 
@@ -28,6 +30,10 @@ local brushLabel
 local brushFill
 local brushKnob
 local statusLabel
+local menuPanel
+local volumeLabel
+local volumeFill
+local volumeTrack
 
 local function snapToGrid(value)
 	return math.floor(value / GRID_SIZE + 0.5) * GRID_SIZE
@@ -49,6 +55,13 @@ local function makeButton(name, text, width, parent)
 	corner.CornerRadius = UDim.new(0, 7)
 	corner.Parent = button
 	return button
+end
+
+local function addCorner(instance, radius)
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, radius)
+	corner.Parent = instance
+	return corner
 end
 
 local function showStatus(message)
@@ -85,6 +98,32 @@ local function createInterface()
 	screen.ResetOnSpawn = false
 	screen.DisplayOrder = 100
 	screen.Parent = playerGui
+
+	local levelLabel = Instance.new("TextLabel")
+	levelLabel.Name = "LevelLabel"
+	levelLabel.Position = UDim2.fromOffset(22, 18)
+	levelLabel.Size = UDim2.fromOffset(150, 34)
+	levelLabel.BackgroundTransparency = 1
+	levelLabel.Font = Enum.Font.GothamBold
+	levelLabel.Text = "FASE 1"
+	levelLabel.TextColor3 = Color3.fromRGB(235, 235, 230)
+	levelLabel.TextScaled = true
+	levelLabel.TextXAlignment = Enum.TextXAlignment.Left
+	levelLabel.Parent = screen
+
+	local menuButton = Instance.new("TextButton")
+	menuButton.Name = "MenuButton"
+	menuButton.AnchorPoint = Vector2.new(1, 0)
+	menuButton.Position = UDim2.new(1, -22, 0, 18)
+	menuButton.Size = UDim2.fromOffset(88, 38)
+	menuButton.BackgroundColor3 = Color3.fromRGB(63, 65, 68)
+	menuButton.BorderSizePixel = 0
+	menuButton.Font = Enum.Font.GothamBold
+	menuButton.Text = "MENU"
+	menuButton.TextColor3 = Color3.fromRGB(245, 245, 245)
+	menuButton.TextScaled = true
+	menuButton.Parent = screen
+	addCorner(menuButton, 7)
 
 	local panel = Instance.new("Frame")
 	panel.Name = "ControlBar"
@@ -223,6 +262,87 @@ local function createInterface()
 	statusCorner.CornerRadius = UDim.new(0, 6)
 	statusCorner.Parent = statusLabel
 
+	menuPanel = Instance.new("Frame")
+	menuPanel.Name = "SettingsPanel"
+	menuPanel.AnchorPoint = Vector2.new(0.5, 0.5)
+	menuPanel.Position = UDim2.fromScale(0.5, 0.5)
+	menuPanel.Size = UDim2.fromOffset(340, 210)
+	menuPanel.BackgroundColor3 = Color3.fromRGB(34, 35, 34)
+	menuPanel.BorderSizePixel = 0
+	menuPanel.Visible = false
+	menuPanel.Parent = screen
+	addCorner(menuPanel, 10)
+
+	local settingsTitle = Instance.new("TextLabel")
+	settingsTitle.Position = UDim2.fromOffset(20, 16)
+	settingsTitle.Size = UDim2.new(1, -40, 0, 34)
+	settingsTitle.BackgroundTransparency = 1
+	settingsTitle.Font = Enum.Font.GothamBold
+	settingsTitle.Text = "CONFIGURAÇÕES"
+	settingsTitle.TextColor3 = Color3.fromRGB(245, 245, 240)
+	settingsTitle.TextScaled = true
+	settingsTitle.Parent = menuPanel
+
+	local masterVolume = SoundService:FindFirstChild("MasterVolume")
+	volumeLabel = Instance.new("TextLabel")
+	volumeLabel.Position = UDim2.fromOffset(24, 70)
+	volumeLabel.Size = UDim2.new(1, -48, 0, 24)
+	volumeLabel.BackgroundTransparency = 1
+	volumeLabel.Font = Enum.Font.GothamMedium
+	volumeLabel.TextColor3 = Color3.fromRGB(215, 215, 210)
+	volumeLabel.TextScaled = true
+	volumeLabel.Text = masterVolume and string.format("VOLUME  %d%%", masterVolume.Volume * 100) or "VOLUME"
+	volumeLabel.Parent = menuPanel
+
+	volumeTrack = Instance.new("TextButton")
+	volumeTrack.Name = "VolumeSlider"
+	volumeTrack.Position = UDim2.fromOffset(28, 112)
+	volumeTrack.Size = UDim2.new(1, -56, 0, 14)
+	volumeTrack.BackgroundColor3 = Color3.fromRGB(18, 19, 18)
+	volumeTrack.BorderSizePixel = 0
+	volumeTrack.Text = ""
+	volumeTrack.AutoButtonColor = false
+	volumeTrack.Parent = menuPanel
+	addCorner(volumeTrack, 8)
+
+	volumeFill = Instance.new("Frame")
+	volumeFill.Name = "Fill"
+	volumeFill.Size = UDim2.new(masterVolume and masterVolume.Volume or 0.5, 0, 1, 0)
+	volumeFill.BackgroundColor3 = Color3.fromRGB(205, 205, 195)
+	volumeFill.BorderSizePixel = 0
+	volumeFill.Parent = volumeTrack
+	addCorner(volumeFill, 8)
+
+	local closeMenu = makeButton("CloseSettings", "VOLTAR", 130, menuPanel)
+	closeMenu.AnchorPoint = Vector2.new(0.5, 0)
+	closeMenu.Position = UDim2.new(0.5, 0, 1, -58)
+	closeMenu.Size = UDim2.fromOffset(130, 40)
+	closeMenu.Activated:Connect(function()
+		menuPanel.Visible = false
+	end)
+	menuButton.Activated:Connect(function()
+		menuPanel.Visible = true
+	end)
+
+	local function setVolumeFromX(x)
+		local master = SoundService:FindFirstChild("MasterVolume")
+		local width = volumeTrack.AbsoluteSize.X
+		if not master or width <= 0 then
+			return
+		end
+		local volume = math.clamp((x - volumeTrack.AbsolutePosition.X) / width, 0, 1)
+		master.Volume = volume
+		volumeFill.Size = UDim2.new(volume, 0, 1, 0)
+		volumeLabel.Text = string.format("VOLUME  %d%%", math.floor(volume * 100 + 0.5))
+	end
+	volumeTrack.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1
+			or input.UserInputType == Enum.UserInputType.Touch then
+			draggingVolume = true
+			setVolumeFromX(input.Position.X)
+		end
+	end)
+
 	unitButton.Activated:Connect(function()
 		showStatus("Guerreiro circular selecionado")
 	end)
@@ -340,7 +460,19 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-	if draggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement
+	if draggingVolume and (input.UserInputType == Enum.UserInputType.MouseMovement
+		or input.UserInputType == Enum.UserInputType.Touch) then
+		if volumeTrack then
+			local master = SoundService:FindFirstChild("MasterVolume")
+			local width = volumeTrack.AbsoluteSize.X
+			if master and width > 0 then
+				local volume = math.clamp((input.Position.X - volumeTrack.AbsolutePosition.X) / width, 0, 1)
+				master.Volume = volume
+				volumeFill.Size = UDim2.new(volume, 0, 1, 0)
+				volumeLabel.Text = string.format("VOLUME  %d%%", math.floor(volume * 100 + 0.5))
+			end
+		end
+	elseif draggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement
 		or input.UserInputType == Enum.UserInputType.Touch) then
 		local track = screen and screen:FindFirstChild("ControlBar")
 			and screen.ControlBar:FindFirstChild("BrushControl")
@@ -365,6 +497,7 @@ UserInputService.InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1
 		or input.UserInputType == Enum.UserInputType.Touch then
 		draggingSlider = false
+		draggingVolume = false
 	end
 end)
 
