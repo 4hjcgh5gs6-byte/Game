@@ -21,6 +21,53 @@ if not placementEvent or not placementEvent:IsA("RemoteEvent") then
 	placementEvent.Parent = ReplicatedStorage
 end
 
+-- Partículas leves de impacto: uma pequena rajada de faíscas no ponto onde a unidade é atingida.
+local Debris = game:GetService("Debris")
+local IMPACT_COLORS = {
+	Ally = Color3.fromRGB(120, 185, 255),
+	Enemy = Color3.fromRGB(255, 120, 110),
+}
+
+local function emitImpact(position, ally)
+	local field = Workspace:FindFirstChild("BattlefieldGenerated")
+	if not field then
+		return
+	end
+
+	local anchor = Instance.new("Part")
+	anchor.Name = "ImpactEffect"
+	anchor.Size = Vector3.new(1, 1, 1)
+	anchor.Position = Vector3.new(position.X, 10, position.Z)
+	anchor.Anchored = true
+	anchor.CanCollide = false
+	anchor.CanTouch = false
+	anchor.CanQuery = false
+	anchor.CastShadow = false
+	anchor.Transparency = 1
+	anchor.Parent = field
+
+	local emitter = Instance.new("ParticleEmitter")
+	emitter.Rate = 0
+	emitter.Lifetime = NumberRange.new(0.3, 0.5)
+	emitter.Speed = NumberRange.new(18, 32)
+	emitter.SpreadAngle = Vector2.new(180, 180)
+	emitter.Drag = 4
+	emitter.LightEmission = 0.5
+	emitter.Color = ColorSequence.new(ally and IMPACT_COLORS.Ally or IMPACT_COLORS.Enemy)
+	emitter.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1.6),
+		NumberSequenceKeypoint.new(1, 0),
+	})
+	emitter.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.2),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	emitter.Parent = anchor
+	emitter:Emit(8)
+
+	Debris:AddItem(anchor, 1)
+end
+
 local states = {}
 local battleOwner
 local battleState = "Preparation"
@@ -319,6 +366,7 @@ local function startBattle(player)
 			fighter.hp = math.max(0, fighter.hp - amount)
 			fighter.model:SetAttribute("Health", fighter.hp)
 			fighter.fill.Size = UDim2.fromScale(fighter.hp / 20, 1)
+			emitImpact(positions[fighter] or fighter.model:GetPivot().Position, fighter.ally)
 			if fighter.hp == 0 then fighter.model:Destroy() end
 		end
 		local alliesAlive, enemiesAlive = 0, 0
