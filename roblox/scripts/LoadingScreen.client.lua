@@ -70,14 +70,23 @@ local function makeText(name, text, position, size, font, color)
     return label
 end
 
-makeText(
+-- Título: Gotham Bold, tamanho fixo 60 e contorno preto suave.
+local title = makeText(
     "Title",
     "BATALHA GEOMÉTRICA",
     UDim2.fromScale(0.5, 0.34),
-    UDim2.fromScale(0.82, 0.1),
+    UDim2.fromScale(0.82, 0.12),
     Enum.Font.GothamBold,
     Color3.fromRGB(240, 240, 240)
 )
+title.TextScaled = false
+title.TextSize = 60
+
+local titleStroke = Instance.new("UIStroke")
+titleStroke.Color = Color3.fromRGB(0, 0, 0)
+titleStroke.Thickness = 2
+titleStroke.Transparency = 0.5
+titleStroke.Parent = title
 local subtitle = makeText(
     "Subtitle",
     " ",
@@ -103,12 +112,31 @@ local function makeButton(name, text, position)
     button.Parent = background
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
+    corner.CornerRadius = UDim.new(0, 12)
     corner.Parent = button
+
+    local stroke = Instance.new("UIStroke")
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Color = Color3.fromRGB(120, 126, 134)
+    stroke.Thickness = 1.5
+    stroke.Transparency = 0.35
+    stroke.Parent = button
     return button
 end
 
 local playButton = makeButton("PlayButton", "PLAY", UDim2.fromScale(0.5, 0.55))
+
+-- Hover moderno no PLAY: cresce um pouco e volta ao tamanho original.
+-- (Usa o tamanho base do botão, assim ele nunca muda de tamanho de forma permanente.)
+local playBaseSize = playButton.Size
+local playHoverSize = UDim2.fromScale(playBaseSize.X.Scale * 1.09, playBaseSize.Y.Scale * 1.09)
+local hoverInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+playButton.MouseEnter:Connect(function()
+    TweenService:Create(playButton, hoverInfo, { Size = playHoverSize }):Play()
+end)
+playButton.MouseLeave:Connect(function()
+    TweenService:Create(playButton, hoverInfo, { Size = playBaseSize }):Play()
+end)
 local menuButton = makeButton("MenuButton", "MENU", UDim2.fromScale(0.5, 0.66))
 
 local normalButton = makeButton("NormalButton", "NORMAL", UDim2.fromScale(0.5, 0.55))
@@ -370,6 +398,8 @@ local function startPhase(difficulty)
             TweenService:Create(item, fade, { TextTransparency = 1 }):Play()
         elseif item:IsA("Frame") then
             TweenService:Create(item, fade, { BackgroundTransparency = 1 }):Play()
+        elseif item:IsA("UIStroke") then
+            TweenService:Create(item, fade, { Transparency = 1 }):Play()
         end
     end
     TweenService:Create(background, fade, { BackgroundTransparency = 1 }):Play()
@@ -401,4 +431,3 @@ difficultyBackButton.Activated:Connect(function()
     menuButton.Visible = true
     subtitle.Text = " "
 end)
-
