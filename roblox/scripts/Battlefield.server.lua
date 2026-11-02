@@ -98,6 +98,24 @@ local function generateBattlefield()
         Enum.Material.SmoothPlastic
     )
     floor.CanCollide = true
+    floor.Reflectance = 0.1
+
+    -- Luz azul bem fraca no meio da arena, só para dar volume ao chão e às unidades.
+    local centerLightPart = makePart(
+        "CenterLight",
+        Vector3.new(1, 1, 1),
+        Vector3.new(0, 24, 0),
+        Color3.fromRGB(80, 140, 255)
+    )
+    centerLightPart.Transparency = 1
+    centerLightPart.CastShadow = false
+    local centerLight = Instance.new("PointLight")
+    centerLight.Color = Color3.fromRGB(80, 140, 255)
+    centerLight.Brightness = 1
+    centerLight.Range = 60
+    centerLight.Shadows = false
+    centerLight.Parent = centerLightPart
+
     -- One surface with 62 thin GUI lines, rather than hundreds of floor parts.
     local grid = Instance.new("SurfaceGui")
     grid.Name = "PlacementGrid"
