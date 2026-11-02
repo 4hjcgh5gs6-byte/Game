@@ -17,6 +17,9 @@ local unitColors = {
 	Enemy = Color3.fromRGB(245, 65, 60),
 }
 
+-- Altura do centro da bola em relação ao pivô da unidade (topo do chão em y = 1, mais raio 8, menos pivô em y = 2,6).
+local BALL_CENTER_HEIGHT = 6.4
+
 local function createWarriorTemplate(faction, color)
 	local model = Instance.new("Model")
 	model.Name = "Circulo_Guerreiro_" .. faction
@@ -28,10 +31,9 @@ local function createWarriorTemplate(faction, color)
 
 	local outline = Instance.new("Part")
 	outline.Name = "Outline"
-	outline.Shape = Enum.PartType.Cylinder
-	outline.Size = Vector3.new(2.8, 19, 19)
-	outline.Orientation = Vector3.new(0, 0, 90)
-	outline.Position = Vector3.new(0, 0, 0)
+	outline.Shape = Enum.PartType.Ball
+	outline.Size = Vector3.new(19, 19, 19)
+	outline.Position = Vector3.new(0, BALL_CENTER_HEIGHT, 0)
 	outline.Anchored = true
 	outline.CanCollide = false
 	outline.CanTouch = false
@@ -42,10 +44,9 @@ local function createWarriorTemplate(faction, color)
 
 	local body = Instance.new("Part")
 	body.Name = "Circle"
-	body.Shape = Enum.PartType.Cylinder
-	body.Size = Vector3.new(3, 16, 16)
-	body.Orientation = Vector3.new(0, 0, 90)
-	body.Position = Vector3.new(0, 0.25, 0)
+	body.Shape = Enum.PartType.Ball
+	body.Size = Vector3.new(16, 16, 16)
+	body.Position = Vector3.new(0, BALL_CENTER_HEIGHT, 0)
 	body.Anchored = true
 	body.CanCollide = false
 	body.CanTouch = false
@@ -55,8 +56,9 @@ local function createWarriorTemplate(faction, color)
 	body.Parent = model
 
 	model.PrimaryPart = body
-	-- Preserve the horizontal disc orientation when callers place an upright model pivot.
-	body.PivotOffset = CFrame.Angles(0, 0, math.rad(-90))
+	-- O pivô fica na base da bola: quem posiciona a unidade em y = 2.6 faz a bola
+	-- "sentar" em cima do chão (topo do chão em y = 1) em vez de afundar nele.
+	body.PivotOffset = CFrame.new(0, -BALL_CENTER_HEIGHT, 0)
 	model.Parent = templates
 end
 
